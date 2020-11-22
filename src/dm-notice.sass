@@ -1,0 +1,85 @@
+.dm-notice--container
+	position: fixed
+	top: 16px
+	right: 16px
+	width: 320px
+	z-index: 99999
+	@media (max-width: 575px)
+		width: calc(100vw - 32px)
+	&.position
+		&_top
+			&-center, &-right, &-left
+				top: 16px
+				.dm-notice
+					transform: translateY(-20px)
+		&_bottom
+			&-center, &-right, &-left
+				bottom: 16px
+				align-items: flex-start
+				@media (max-width: 767px)
+					bottom: 62px
+				.dm-notice
+					transform: translateY(20px)
+		&_top, &_bottom
+			&-center
+				left: 50%
+				transform: translateX(-50%)
+			&-right
+				right: 16px
+			&-left
+				left: 16px
+
+
+.dm-notice
+	position: relative
+	display: flex
+	width: 100%
+	justify-content: space-between
+	align-items: center
+	padding: 8px 12px
+	//margin-bottom: 10px
+	font-family: inherit
+	font-size: 14px
+	color: #292d34
+	border-left: 5px solid transparent
+	border-radius: 6px
+	background: #fff
+	box-shadow: 0 8px 32px rgba(0,0,0,.07)
+	opacity: 0
+	transform: translateY(20px)
+	transition: .25s ease // добавлять стилем инлайн
+	@media (max-width: 991px)
+		padding: 10px 15px
+	@media (max-width: 575px)
+		font-size: 13px
+	& + .dm-notice
+		margin-top: 10px
+	&.dark
+		font-weight: 300
+		color: #fff
+		background: rgba(47, 47, 47, 0.9)
+	&.show
+		opacity: 1
+		transform: none !important
+	&__content
+		margin-right: 20px
+		a
+			color: inherit
+			text-decoration: underline
+			&:hover
+				color: #E03131
+	&__close
+		opacity: .7
+		transition: .1s ease
+		cursor: pointer
+		&:hover
+			opacity: 1
+		svg
+			width: calc(1em + 2px)
+			height: calc(1em + 2px)
+	&.success
+		border-left-color: #28a745
+	&.danger
+		border-left-color: #dc3545
+	&.warning
+		border-left-color: #ffc107

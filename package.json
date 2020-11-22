@@ -1,0 +1,16 @@
+{
+  "name": "dm-notice",
+  "version": "1.0.0",
+  "description": "notice js library",
+  "main": "index.html",
+  "dependencies": {},
+  "devDependencies": {
+    "parcel": "^2.0.0-nightly.457",
+    "sass": "^1.29.0"
+  },
+  "scripts": {
+    "start": "parcel serve ./index.html"
+  },
+  "author": "Denis Minimal",
+  "license": "ISC"
+}
