@@ -4,8 +4,7 @@ const btn = document.querySelector('.btn');
 const notice = DmNotice.init({
   position: 'top-center',
   style: 'dark',
-  status: 'danger',
-  closeTimeout: 200000
+  status: 'danger'
 })
 
 btn.addEventListener('click', () => {
