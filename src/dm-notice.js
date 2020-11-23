@@ -12,8 +12,7 @@
 // }
 
 export default class DmNotice {
-  constructor(text = '', options = {}) {
-    this.text = text
+  constructor(options = {}) {
     this.options = {
       position: 'top-right',
       style: 'light',
@@ -23,21 +22,20 @@ export default class DmNotice {
       autoClose: true,
       ...options
     }
-    this.noticeCounter = 0
-
-    this.#createContainer()
   }
 
   static init(options) {
-    return new this('', options)
+    return new this(options)
   }
 
   show(text) {
-    this.text = text + ' ' + this.noticeCounter
+    this.text = text
 
-    if (!document.querySelector('.dm-notice--container')) {
-      document.body.append(this.$container)
+    if (!document.body.querySelector(`.dm-notice--container.position_${this.options.position}`)) {
+      document.body.append(this.#createContainer())
     }
+
+    this.$container = document.body.querySelector(`.dm-notice--container.position_${this.options.position}`)
 
     if(this.isBottomPosition) {
       this.$container.prepend(this.#createNotice())
@@ -45,12 +43,42 @@ export default class DmNotice {
       this.$container.append(this.#createNotice())
     }
 
-
-
     if(this.options.autoClose) {
       this.autoHideNotice(this.noticeCounter)
     }
   }
+
+  static show(text, options = {}) {
+    const notice = new this(options)
+    notice.show(text)
+  }
+
+  success(text) {
+    this.options.status = 'success'
+    this.show(text)
+  }
+
+  static success(text, options = {}) {
+    const notice = new this({
+      ...options,
+      status: 'success'
+    })
+    notice.show(text)
+  }
+
+  error(text) {
+    this.options.status = 'error'
+    this.show(text)
+  }
+
+  static error(text, options = {}) {
+    const notice = new this({
+      ...options,
+      status: 'error'
+    })
+    notice.show(text)
+  }
+
 
   /**
    * Create notice container
@@ -60,6 +88,8 @@ export default class DmNotice {
     this.$container.className = `dm-notice--container position_${this.options.position}`
 
     this.$container.addEventListener('click', (e) => this.clickHandler(e))
+
+    return this.$container
   }
 
   /**
@@ -67,19 +97,22 @@ export default class DmNotice {
    */
   #createNotice() {
     const notice = document.createElement('div')
-
-    this.noticeCounter++
+    this.noticeCounter = this.#getNoticeId()
 
     notice.className = `dm-notice ${this.options.status} ${this.options.style}`
     notice.setAttribute('data-id', this.noticeCounter)
-    notice.innerHTML = `
-      <div class="dm-notice__content">${this.text}</div>
-      <div class="dm-notice__close" data-type="close">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </div>`
+    notice.insertAdjacentHTML('beforeend', `<div class="dm-notice__content">${this.text}</div>`)
+
+    if(this.options.showClose) {
+      notice.insertAdjacentHTML('beforeend', `
+        <div class="dm-notice__close" data-type="close">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </div>`
+      )
+    }
 
     return notice
   }
@@ -108,18 +141,18 @@ export default class DmNotice {
       notice.classList.add('closing')
 
       if (this.isBottomPosition) {
-        notice.style.marginBottom = `-${notice.offsetHeight}px`;
+        notice.style.marginBottom = `-${notice.offsetHeight}px`
       } else {
-        notice.style.marginTop = `-${notice.offsetHeight + 10}px`;
+        notice.style.marginTop = `-${notice.offsetHeight + 10}px`
       }
 
       setTimeout(() => {
-        notice.remove();
+        notice.remove()
 
         if (!this.$container.querySelector('.dm-notice')) {
-          this.destroy();
+          this.destroy()
         }
-      }, 1000);
+      }, 300)
     }
   }
 
@@ -137,6 +170,10 @@ export default class DmNotice {
 
   get isBottomPosition() {
     return /bottom-/.test(this.options.position)
+  }
+
+  #getNoticeId() {
+    return (~~(Math.random()*1e10)).toString(16)
   }
 }
 
