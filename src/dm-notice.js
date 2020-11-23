@@ -7,9 +7,9 @@
  * timeout: timeout closing
  * transition: transition closing
  */
-
-
-
+// export default function dmNotice(text, options) {
+//   return new Notification(text, options)
+// }
 
 export default class DmNotice {
   constructor(text = '', options = {}) {
@@ -18,99 +18,125 @@ export default class DmNotice {
       position: 'top-right',
       style: 'light',
       status: '',
-      timeout: 5000,
-      transition: 300,
+      closeTimeout: 5000,
+      showClose: true,
+      autoClose: true,
       ...options
     }
-    this.deleted = false;
-    this.notices = []
+    this.noticeCounter = 0
+
+    this.#createContainer()
   }
 
   static init(options) {
     return new this('', options)
   }
 
-  show(noticeText) {
-    this.text = noticeText
+  show(text) {
+    this.text = text + ' ' + this.noticeCounter
 
     if (!document.querySelector('.dm-notice--container')) {
-      this.#createContainer()
+      document.body.append(this.$container)
     }
 
-    this.#createNotice()
+    if(this.isBottomPosition) {
+      this.$container.prepend(this.#createNotice())
+    } else {
+      this.$container.append(this.#createNotice())
+    }
+
+
+
+    if(this.options.autoClose) {
+      this.autoHideNotice(this.noticeCounter)
+    }
   }
 
   /**
    * Create notice container
    */
   #createContainer() {
-    const container = `<div class="dm-notice--container position_${this.options.position}"
-                            style="transition: transform ${this.options.transition / 1000}s ease"></div>`
-    document.body.insertAdjacentHTML('beforeend', container)
+    this.$container = document.createElement('div')
+    this.$container.className = `dm-notice--container position_${this.options.position}`
+
+    this.$container.addEventListener('click', (e) => this.clickHandler(e))
   }
 
   /**
    * Create notice
    */
   #createNotice() {
-    this.$notice = document.createElement('div')
+    const notice = document.createElement('div')
 
-    this.$notice.className = `dm-notice ${this.options.status} ${this.options.style}`
-    this.$notice.innerHTML = `
+    this.noticeCounter++
+
+    notice.className = `dm-notice ${this.options.status} ${this.options.style}`
+    notice.setAttribute('data-id', this.noticeCounter)
+    notice.innerHTML = `
       <div class="dm-notice__content">${this.text}</div>
-      <div class="dm-notice__close">
+      <div class="dm-notice__close" data-type="close">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </div>`
 
-    this.$closeButton = this.$notice.querySelector('.dm-notice__close')
-    this.$closeButton.addEventListener('click', () => this.close())
-
-    document.querySelector('.dm-notice--container').append(this.$notice)
-
-    setTimeout(() => {
-      this.$notice.classList.add('show')
-    }, 100)
-
-    setTimeout(() => {
-      this.close()
-    }, this.options.timeout)
+    return notice
   }
 
   /**
-   * Close notice
+   * Click close handler
+   * @param e
    */
-  close() {
-    if (!this.deleted) {
-      this.deleted = true
-      this.$notice.classList.remove('show')
+  clickHandler(e) {
+    if(e.target.closest('.dm-notice__close') || e.target.classList.contains('dm-notice__close')) {
+      const noticeId = e.target.closest('.dm-notice[data-id]').getAttribute('data-id')
+      this.hideNotice(noticeId)
+    }
+  }
 
-      this.#closeAnimation()
+
+  /**
+   * Close notice
+   *
+   * @param id (id notice)
+   */
+  hideNotice(id) {
+    const notice = this.$container.querySelector(`.dm-notice[data-id="${id}"]`)
+
+    if(notice) {
+      notice.classList.add('closing')
+
+      if (this.isBottomPosition) {
+        notice.style.marginBottom = `-${notice.offsetHeight}px`;
+      } else {
+        notice.style.marginTop = `-${notice.offsetHeight + 10}px`;
+      }
 
       setTimeout(() => {
-        this.$closeButton.removeEventListener('click', this.close);
-        this.$notice.remove();
+        notice.remove();
 
-        if (!document.body.querySelector('.dm-notice')) {
-          this.removeContainer();
+        if (!this.$container.querySelector('.dm-notice')) {
+          this.destroy();
         }
-      }, this.options.transition);
+      }, 1000);
     }
   }
 
-  #closeAnimation() {
-    if (/top-/.test(this.options.position)) {
-      this.$notice.style.marginTop = `-${this.$notice.offsetHeight + 10}px`;
-    } else {
-      this.$notice.style.marginBottom = `-${this.$notice.offsetHeight + 10}px`;
-    }
+  autoHideNotice(id) {
+    setTimeout(() => {
+      this.hideNotice(id)
+    }, this.options.closeTimeout)
   }
 
-  removeContainer() {
-    const container = document.querySelector('.dm-notice--container');
-    container.remove();
+  destroy() {
+    this.$container.removeEventListener('click', () => this.clickHandler())
+    this.$container.remove()
+    this.noticeCounter = 0
+  }
+
+  get isBottomPosition() {
+    return /bottom-/.test(this.options.position)
   }
 }
 

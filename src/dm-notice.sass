@@ -1,7 +1,5 @@
 .dm-notice--container
 	position: fixed
-	top: 16px
-	right: 16px
 	width: 320px
 	z-index: 99999
 	@media (max-width: 575px)
@@ -10,16 +8,11 @@
 		&_top
 			&-center, &-right, &-left
 				top: 16px
-				.dm-notice
-					transform: translateY(-20px)
 		&_bottom
 			&-center, &-right, &-left
 				bottom: 16px
-				align-items: flex-start
 				@media (max-width: 767px)
 					bottom: 62px
-				.dm-notice
-					transform: translateY(20px)
 		&_top, &_bottom
 			&-center
 				left: 50%
@@ -37,7 +30,7 @@
 	justify-content: space-between
 	align-items: center
 	padding: 8px 12px
-	//margin-bottom: 10px
+	margin-bottom: 10px
 	font-family: inherit
 	font-size: 14px
 	color: #292d34
@@ -46,21 +39,20 @@
 	background: #fff
 	box-shadow: 0 8px 32px rgba(0,0,0,.07)
 	opacity: 0
-	transform: translateY(20px)
-	transition: .25s ease // добавлять стилем инлайн
+	transition: .3s
+	animation: show .3s ease both
 	@media (max-width: 991px)
 		padding: 10px 15px
 	@media (max-width: 575px)
 		font-size: 13px
-	& + .dm-notice
-		margin-top: 10px
 	&.dark
 		font-weight: 300
 		color: #fff
 		background: rgba(47, 47, 47, 0.9)
-	&.show
-		opacity: 1
-		transform: none !important
+	//&.show
+	//	animation: show .3s ease both
+	&.closing
+		animation: closing .15s ease both
 	&__content
 		margin-right: 20px
 		a
@@ -81,5 +73,32 @@
 		border-left-color: #28a745
 	&.danger
 		border-left-color: #dc3545
+		//animation: danger .2s ease both
 	&.warning
 		border-left-color: #ffc107
+
+@keyframes show
+	from
+		opacity: 0
+	to
+		opacity: 1
+
+@keyframes closing
+	from
+		opacity: 1
+	to
+		opacity: 0
+
+@keyframes danger
+	0%
+		transform: translateX(0)
+	6.5%
+		transform: translateX(-6px) rotateY(-9deg)
+	18.5%
+		transform: translateX(5px) rotateY(7deg)
+	31.5%
+		transform: translateX(-3px) rotateY(-5deg)
+	43.5%
+		transform: translateX(2px) rotateY(3deg)
+	50%
+		transform: translateX(0)
