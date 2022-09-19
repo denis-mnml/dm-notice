@@ -7,9 +7,6 @@
  * timeout: timeout closing
  * transition: transition closing
  */
-// export default function dmNotice(text, options) {
-//   return new Notification(text, options)
-// }
 
 export default class DmNotice {
   constructor(options = {}) {
